@@ -1,4 +1,4 @@
-def read_bytes(filePath):
+def read_bytes(filePath: str):
     if not isinstance(filePath, str):
         raise ValueError("filePath has to be of type string")
 
@@ -10,7 +10,7 @@ def read_bytes(filePath):
     return bytes
 
 
-def write_bytes(filePath, data):
+def write_bytes(filePath: str, data: bytearray):
     if not isinstance(filePath, str):
         raise ValueError("filePath has to be of type string")
 
