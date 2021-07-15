@@ -1,5 +1,4 @@
 from tkinter import *
-from GUI.MainWindow import *
 
 class ContextMenuListBox(Listbox):
     def __init__(self, parent, *args, **kwargs):

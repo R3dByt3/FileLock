@@ -1,10 +1,8 @@
 from Model.encrypter import encrypter
-from GUI.MainWindow import *
 from tkinter import *
 from GUI.ContextMenuListBox import *
 from GUI.StartWindow import *
 
-<<<<<<< Updated upstream
 #pw = "Mein PW"
 #data = bytearray("Meine Bytes", encoding="UTF-8")
 #crypt = encrypter()

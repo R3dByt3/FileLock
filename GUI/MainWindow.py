@@ -1,7 +1,7 @@
 from tkinter import *
 import tkinter.messagebox
 from tkinter.filedialog import askopenfilenames, asksaveasfilename
-from GUI.ContextMenuListBox import *
+from GUI.ContextMenuListBox import ContextMenuListBox
 
 class MainWindow():
     def __init__(self):
