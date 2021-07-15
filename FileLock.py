@@ -1,7 +1,10 @@
 from Model.encrypter import encrypter
 from GUI.MainWindow import *
 from tkinter import *
+from GUI.ContextMenuListBox import *
+from GUI.StartWindow import *
 
+<<<<<<< Updated upstream
 #pw = "Mein PW"
 #data = bytearray("Meine Bytes", encoding="UTF-8")
 #crypt = encrypter()
@@ -13,11 +16,5 @@ from tkinter import *
 # print(decrypted)
 # print(data)
 
-window = Tk()
-window.title("Super duper Titel")
-window.geometry("500x500")
-window.config(background="black")
-gui = GUI(window)
-gui.pack(fill="both", expand=True)
-
-mainloop()
+startwindow = StartWindow()
+startwindow.start()
