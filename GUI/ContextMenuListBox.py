@@ -3,9 +3,9 @@ from tkinter import *
 class ContextMenuListBox(Listbox):
     def __init__(self, parent, *args, **kwargs):
         Listbox.__init__(self, parent, *args, **kwargs)
-
+        
         scrollbar = Scrollbar(self)
-        scrollbar.pack(side = RIGHT)
+        scrollbar.pack(side = RIGHT, fill=Y)
 
         self.yview_scroll = scrollbar.set
 
