@@ -1,6 +1,3 @@
-from Model.encrypter import encrypter
-from tkinter import *
-from GUI.ContextMenuListBox import *
 from GUI.StartWindow import *
 
 #pw = "Mein PW"

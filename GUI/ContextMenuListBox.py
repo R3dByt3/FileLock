@@ -4,11 +4,6 @@ class ContextMenuListBox(Listbox):
     def __init__(self, parent, *args, **kwargs):
         Listbox.__init__(self, parent, *args, **kwargs)
         
-        scrollbar = Scrollbar(self)
-        scrollbar.pack(side = RIGHT, fill=Y)
-
-        self.yview_scroll = scrollbar.set
-
         self.popup_menu = Menu(self, tearoff=0)
         self.popup_menu.add_command(label="Remove", command=self.remove_selected)
 

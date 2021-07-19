@@ -33,11 +33,11 @@ class StartWindow():
             tkinter.messagebox.showerror("Incorrect password", "You entered the wrong password.\nPlease try again.")
 
     def create_widgets(self):
-        self.label_enter_passwordLabel = Label(self.root, text="Enter the password: ")
-        self.label_enter_passwordLabel.grid(column=0, row=0, padx=5, pady=5, sticky=W)
+        label_enter_passwordLabel = Label(self.root, text="Enter the password: ")
+        label_enter_passwordLabel.grid(column=0, row=0, padx=5, pady=5, sticky=W)
         self.entry_password = Entry(self.root, show="*")
         self.entry_password.grid(column=1, row=0, padx=5, pady=5, sticky=W+E)
-        self.button_login = Button(self.root, text="Login")
-        self.button_login.bind('<Button-1>', self.startMainWindow)
-        self.button_login.grid(column=1, row=1, padx=5, pady=5, sticky=W+E)
+        button_login = Button(self.root, text="Login")
+        button_login.bind('<Button-1>', self.startMainWindow)
+        button_login.grid(column=1, row=1, padx=5, pady=5, sticky=W+E)
         self.root.bind('<Return>', self.startMainWindow)
