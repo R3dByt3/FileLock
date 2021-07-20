@@ -1,12 +1,14 @@
 from abc import ABCMeta, abstractmethod
 from Projekt.Model.chunktype import chunk_type
 from Projekt.Model.header_chunk import header_chunk
+from Projekt.Model.chunk import chunk
 
 
 class chunk(object, metaclass=ABCMeta):
 
     __type = chunk_type.Undefined
     Data = bytearray(1024 * 1024)
+    Index = -1
     ChunkAddress = 0
     NextChunkAddress = 0
     NextChunk = None
@@ -16,7 +18,7 @@ class chunk(object, metaclass=ABCMeta):
 
         self.Type = chunk_type
 
-    def serialize(self):
+    def serialize(self) -> bytearray:
 
         data = bytearray(self.__type)
         data.append(self.Data)
@@ -30,7 +32,7 @@ class chunk(object, metaclass=ABCMeta):
         self.NextChunkAddress = int.from_bytes(data[1024*1024 + 4:], "big")
 
     @staticmethod
-    def get_chunks_for_data(self, chunk_type: chunk_type, data: bytearray):
+    def get_chunks_for_data(self, chunk_type: chunk_type, data: bytearray) -> list[chunk]:
 
         last_chunk: chunk = None
         current_chunk: chunk = None

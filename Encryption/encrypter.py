@@ -1,4 +1,4 @@
-from Encryption.key_generator import key_generator
+from Projekt.Encryption.key_generator import key_generator
 
 
 class encrypter():
