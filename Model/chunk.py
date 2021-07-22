@@ -3,7 +3,7 @@ from Model.chunktype import chunk_type
 
 class chunk():
 
-    __type = chunk_type.Undefined
+    Type = chunk_type.Undefined
     Data = bytearray(1024 * 1024)
     ChunkAddress = -1
     NextChunkAddress = -1
@@ -11,7 +11,7 @@ class chunk():
 
     def __init__(self, chunk_type: chunk_type, data: bytearray):
 
-        for x in range(0, 1024 * 1024 + 8 - len(data)):
+        for x in range(0, 1024 * 1024 + 4 - len(data)):
             data.append(0)
 
         self.Type = chunk_type
@@ -19,7 +19,7 @@ class chunk():
 
     def serialize(self) -> bytearray:
 
-        data = bytearray(int(self.__type).to_bytes(2, "big"))
+        data = bytearray(int(self.Type).to_bytes(2, "big"))
         data += self.Data
         data += bytearray(self.NextChunkAddress.to_bytes(2,
                           byteorder="big", signed=True))
@@ -27,10 +27,10 @@ class chunk():
 
     def deserialize(self, data: bytearray):
 
-        self.__type = chunk_type(int.from_bytes(data[:4], "big"))
-        self.Data = data[4:1024*1024 + 4]
+        self.Type = chunk_type(int.from_bytes(data[:2], "big"))
+        self.Data = data[2:1024*1024 + 2]
         self.NextChunkAddress = int.from_bytes(
-            data[1024*1024 + 4:], byteorder="big", signed=True)
+            data[1024*1024 + 2:], byteorder="big", signed=True)
 
     @staticmethod
     def get_chunks_for_data(chunk_type: chunk_type, data: bytearray) -> list['chunk']:

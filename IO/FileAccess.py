@@ -1,7 +1,9 @@
+from io import SEEK_END
 from Model.filemodel import file_model
 from Model.chunk import chunk
 from Model.chunktype import chunk_type
 import os.path
+import os
 
 
 class file_access:
@@ -14,7 +16,7 @@ class file_access:
         self.__passwordHash = passwordHash
 
         if os.path.isfile(filePath):
-            chunks = self.read_chunks(chunk_type.Header)
+            chunks = list(self.read_chunks(chunk_type.Header))
             firstHeader = next(
                 obj for obj in chunks if obj.Type == chunk_type.Header)
 
@@ -60,7 +62,7 @@ class file_access:
 
     def insert_chunks(self, chunks: list[chunk]):
         with open(self.__filePath, "wb") as f:
-            f.seek(0, 2)
+            f.seek(0, os.SEEK_END)
             size = f.tell()
             f.seek(0)
             for index in range(0, len(chunks)):
@@ -68,7 +70,7 @@ class file_access:
                     f.seek(chunks[index].ChunkAddress)
                     f.write(chunks[index].serialize())
                 else:
-                    f.seek(size)
+                    f.seek(0, os.SEEK_END)
                     f.write(chunks[index].serialize())
                     size = f.tell()
 
@@ -82,24 +84,22 @@ class file_access:
             size = f.tell()
             f.seek(0)
 
-            current: chunk = None
-            address = 0
-
             while(f.tell() < size):
-                type = chunk_type(int.from_bytes(f.read(4), "big"))
-                data = f.read(1024 * 1024)
+                current: chunk = None
+                address = 0
+                type = chunk_type(int.from_bytes(f.read(2), "big"))
 
                 if type == searchType:
-                    current = chunk(data)
+                    data = bytearray(f.read(1024 * 1024))
+                    current = chunk(searchType, data)
                     current.NextChunkAddress = int.from_bytes(
-                        f.read(4))
+                        f.read(2), byteorder="big", signed=True)
+                    current.ChunkAddress = address
+                    chunks.append(current)
                 else:
-                    f.seek(1024 * 1024 + 4)
+                    f.seek(1024 * 1024 + 2, os.SEEK_CUR)
 
-                current.ChunkAddress = address
-                address = address + 1024 * 1024 + 8
-
-                chunks.append(current)
+                address = address + 1024 * 1024 + 4
 
         for single in chunks.copy():
             retVal.append(self.resolve_childs(single, chunks))
