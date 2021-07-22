@@ -1,53 +1,49 @@
-from abc import ABCMeta, abstractmethod
-from Projekt.Model.chunktype import chunk_type
-from Projekt.Model.header_chunk import header_chunk
-from Projekt.Model.chunk import chunk
+from Model.chunktype import chunk_type
 
 
-class chunk(object, metaclass=ABCMeta):
+class chunk():
 
     __type = chunk_type.Undefined
     Data = bytearray(1024 * 1024)
-    Index = -1
-    ChunkAddress = 0
-    NextChunkAddress = 0
-    NextChunk: chunk = None
+    ChunkAddress = -1
+    NextChunkAddress = -1
+    NextChunk: 'chunk' = None
 
-    @abstractmethod
-    def __init__(self, chunk_type: chunk_type):
+    def __init__(self, chunk_type: chunk_type, data: bytearray):
+
+        for x in range(0, 1024 * 1024 + 8 - len(data)):
+            data.append(0)
 
         self.Type = chunk_type
+        self.Data = data
 
     def serialize(self) -> bytearray:
 
-        data = bytearray(self.__type)
-        data.append(self.Data)
-        data.append(self.NextChunkAddress)
+        data = bytearray(int(self.__type).to_bytes(2, "big"))
+        data += self.Data
+        data += bytearray(self.NextChunkAddress.to_bytes(2,
+                          byteorder="big", signed=True))
         return data
 
     def deserialize(self, data: bytearray):
 
         self.__type = chunk_type(int.from_bytes(data[:4], "big"))
         self.Data = data[4:1024*1024 + 4]
-        self.NextChunkAddress = int.from_bytes(data[1024*1024 + 4:], "big")
+        self.NextChunkAddress = int.from_bytes(
+            data[1024*1024 + 4:], byteorder="big", signed=True)
 
     @staticmethod
-    def get_chunks_for_data(self, chunk_type: chunk_type, data: bytearray) -> list[chunk]:
+    def get_chunks_for_data(chunk_type: chunk_type, data: bytearray) -> list['chunk']:
 
         last_chunk: chunk = None
         current_chunk: chunk = None
 
         for index in range(0, len(data), 1024 * 1024):
-            if (chunk_type is chunk_type.Header):
-                current_chunk = header_chunk(data[index:index + 1024 * 1024])
-            elif (chunk_type is chunk_type.Map):
-                pass
-            elif (chunk_type is chunk_type.Data):
-                pass
-            else:
-                raise NotImplementedError
+            current_chunk = chunk(chunk_type, data[index:index + 1024 * 1024])
 
-            if (last_chunk is not None):
+            if (last_chunk != None):
                 last_chunk.NextChunk = current_chunk
+
+            yield current_chunk
 
             last_chunk = current_chunk

@@ -1,20 +1,26 @@
+from Encryption.crypto import encrypter
 from tkinter import *
 import tkinter.messagebox
 from tkinter.filedialog import askopenfilenames
 from GUI.ContextMenuListBox import ContextMenuListBox
 from tkinter import ttk
-from Encryption import encrypter
+from os.path import *
 
 
 class MainWindow():
     def __init__(self):
+        path = join(dirname(dirname(realpath(__file__))),
+                    "Images", "applicationicon.ico")
+
+        dbPath = join(dirname(dirname(realpath(__file__))), "db.db")
+
         self.root = Tk()
         self.root.wm_title("File encryptor")
-        self.root.iconbitmap("Images/applicationicon.ico")
+        self.root.iconbitmap(path)
         self.root.geometry("500x500")
         self.root.eval('tk::PlaceWindow . center')
 
-        self.crypter = encrypter()
+        self.crypter = encrypter(dbPath, "Mein PW")
 
         self.tab_control = ttk.Notebook(self.root)
 

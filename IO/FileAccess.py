@@ -1,6 +1,7 @@
-from Projekt.Model.filemodel import file_model
-from Projekt.Model.chunk import chunk
-from Projekt.Model.chunktype import chunk_type
+from Model.filemodel import file_model
+from Model.chunk import chunk
+from Model.chunktype import chunk_type
+import os.path
 
 
 class file_access:
@@ -12,13 +13,28 @@ class file_access:
         self.__filePath = filePath
         self.__passwordHash = passwordHash
 
-        chunks = self.read_chunks(chunk_type.Header)
-        firstHeader = next(
-            obj for obj in chunks if obj.Type == chunk_type.Header)
+        if os.path.isfile(filePath):
+            chunks = self.read_chunks(chunk_type.Header)
+            firstHeader = next(
+                obj for obj in chunks if obj.Type == chunk_type.Header)
 
-        for index in range(0, 128):
-            if passwordHash[index] != firstHeader.Data[index]:
-                raise PermissionError("Password is incorrect")
+            for index in range(0, 128):
+                if passwordHash[index] != firstHeader.Data[index]:
+                    raise PermissionError("Password is incorrect")
+
+        else:
+            headers = list(chunk.get_chunks_for_data(
+                chunk_type.Header, passwordHash))
+            self.insert_chunks(headers)
+
+    def write_files(self, files: list[file_model]):
+        content = ''.join(
+            [num.FullPath + "*/" + num.ChunkAddress for num in files])
+
+        data = content.encode("UTF-8")
+
+        chunks = list(chunk.get_chunks_for_data(chunk_type.Map, data))
+        self.insert_chunks(chunks)
 
     def read_files(self) -> list[file_model]:
         chunks = self.read_chunks(chunk_type.Map)
@@ -42,11 +58,19 @@ class file_access:
             for index in range(0, len(chunks)):
                 f.write(chunks[index].serialize())
 
-    def update_chunks(self, chunks: list[chunk]):
+    def insert_chunks(self, chunks: list[chunk]):
         with open(self.__filePath, "wb") as f:
+            f.seek(0, 2)
+            size = f.tell()
+            f.seek(0)
             for index in range(0, len(chunks)):
-                f.seek(chunks[index].Index * 1024 * 1024 + 8)
-                f.write(chunks[index].serialize())
+                if chunks[index].ChunkAddress != -1:
+                    f.seek(chunks[index].ChunkAddress)
+                    f.write(chunks[index].serialize())
+                else:
+                    f.seek(size)
+                    f.write(chunks[index].serialize())
+                    size = f.tell()
 
     def read_chunks(self, searchType: chunk_type) -> list[chunk]:
 
@@ -62,7 +86,7 @@ class file_access:
             address = 0
 
             while(f.tell() < size):
-                type = chunk_type(int.from_bytes(f.read(4)))
+                type = chunk_type(int.from_bytes(f.read(4), "big"))
                 data = f.read(1024 * 1024)
 
                 if type == searchType:

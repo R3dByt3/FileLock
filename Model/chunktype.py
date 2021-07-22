@@ -1,7 +1,7 @@
-from enum import Enum
+from enum import IntEnum
 
 
-class chunk_type(Enum):
+class chunk_type(IntEnum):
     Undefined = 0,
     Header = 1,
     Map = 2,

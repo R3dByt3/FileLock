@@ -1,10 +1,10 @@
 class file_model:
-    __fullPath: str = None
-    __chunkAddress: int = None
+    FullPath: str = None
+    ChunkAddress: int = None
 
     def __init__(self, path: str):
-        self.__fullPath = path
+        self.FullPath = path
 
     def __init__(self, path: str, address: int):
-        self.__fullPath = path
-        self.__chunkAddress = address
+        self.FullPath = path
+        self.ChunkAddress = address

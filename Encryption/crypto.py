@@ -1,3 +1,4 @@
+from Model.filemodel import file_model
 from Encryption.key_generator import key_generator
 from IO.FileAccess import file_access
 
@@ -13,7 +14,10 @@ class encrypter():
     def __init__(self, filePath: str, password: str):
         self.__filePath = filePath
         self.__passwordHash = self.__key_gen.get_password_hash(password)
-        self.__fileAccess = file_access(filePath)
+        self.__fileAccess = file_access(filePath, self.__passwordHash)
+
+    def read_files(self) -> list[file_model]:
+        return self.__fileAccess.read_files()
 
     def encrypt2(self, data: bytearray, password: str):
 
