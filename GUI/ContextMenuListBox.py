@@ -18,4 +18,3 @@ class ContextMenuListBox(Listbox):
     def remove_selected(self):
         for element in self.curselection()[::-1]:
             self.delete(element)
-        
