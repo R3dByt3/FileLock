@@ -3,7 +3,8 @@ import tkinter.messagebox
 from tkinter.filedialog import askopenfilenames
 from GUI.ContextMenuListBox import ContextMenuListBox
 from tkinter import ttk
-from Model.encrypter import encrypter
+from Encryption import encrypter
+
 
 class MainWindow():
     def __init__(self):
@@ -40,17 +41,19 @@ class MainWindow():
         selectedItems = self.listbox_encrypt_files.curselection()
 
         if selectedItems == ((),):
-            tkinter.messagebox.showerror("Encryption failed", "No files selected")
+            tkinter.messagebox.showerror(
+                "Encryption failed", "No files selected")
             return
 
         counter = 0
-        simpleMode = True 
+        simpleMode = True
 
         if self.encryption_type_combobox.current() == 1:
             simpleMode = False
 
         for selectedItem in selectedItems:
-            bytearrayFile = open(self.listbox_encrypt_files.get(selectedItem),"rb").read()
+            bytearrayFile = open(
+                self.listbox_encrypt_files.get(selectedItem), "rb").read()
 
             if simpleMode:
                 wasSuccessful = self.crypter.encrypt(bytearrayFile, "Mein PW")
@@ -58,21 +61,26 @@ class MainWindow():
                 tkinter.messagebox.showerror("Encryption failed", "no")
 
             if not wasSuccessful:
-                tkinter.messagebox.showerror("Encryption failed", "Encryption failed")
+                tkinter.messagebox.showerror(
+                    "Encryption failed", "Encryption failed")
                 return
-            
+
             counter = counter + 1
-            self.label_encrypted_files_counter_text.set("{} of {} files were encrypted".format(counter, len(selectedItems)))
+            self.label_encrypted_files_counter_text.set(
+                "{} of {} files were encrypted".format(counter, len(selectedItems)))
             self.listbox_encrypt_files.update()
 
-        tkinter.messagebox.showinfo("Encryption succeeded", "All files were encrypted.")
+        tkinter.messagebox.showinfo(
+            "Encryption succeeded", "All files were encrypted.")
 
     def buttonDecryptionClick(self):
         dosomething = False
         if dosomething:
-            tkinter.messagebox.showinfo("Decryption succeeded", "All file were decrypted.")
+            tkinter.messagebox.showinfo(
+                "Decryption succeeded", "All file were decrypted.")
         else:
-            tkinter.messagebox.showerror("Decryption failed", "Decryption failed")
+            tkinter.messagebox.showerror(
+                "Decryption failed", "Decryption failed")
 
     def init_encrypt_tab(self):
         Grid.columnconfigure(self.encrypt_tab, 0, weight=1)
@@ -84,32 +92,43 @@ class MainWindow():
         Grid.rowconfigure(self.encrypt_tab, 3, weight=0)
         Grid.rowconfigure(self.encrypt_tab, 4, weight=0)
 
-        label_select_files = Label(self.encrypt_tab, text="Select the files you want to encrypt: ")
+        label_select_files = Label(
+            self.encrypt_tab, text="Select the files you want to encrypt: ")
         label_select_files.grid(column=0, row=0, padx='5', pady='5', sticky=W)
 
-        button_open_file_explorer = Button(self.encrypt_tab, text="Open file explorer", command=self.openFileDialog)
-        button_open_file_explorer.grid(column=1, row=0, padx='5', pady='5', sticky=E+W)
+        button_open_file_explorer = Button(
+            self.encrypt_tab, text="Open file explorer", command=self.openFileDialog)
+        button_open_file_explorer.grid(
+            column=1, row=0, padx='5', pady='5', sticky=E+W)
 
-        self.encryption_type_combobox = ttk.Combobox(self.encrypt_tab, state="readonly", values=["Simple", "Extended (Needs more storage)"])
-        self.encryption_type_combobox.grid(column=0, columnspan=2, row=1, padx=5, pady=5, sticky=E+W)
+        self.encryption_type_combobox = ttk.Combobox(self.encrypt_tab, state="readonly", values=[
+                                                     "Simple", "Extended (Needs more storage)"])
+        self.encryption_type_combobox.grid(
+            column=0, columnspan=2, row=1, padx=5, pady=5, sticky=E+W)
         self.encryption_type_combobox.current(0)
 
-        self.listbox_encrypt_files = ContextMenuListBox(self.encrypt_tab, selectmode='multiple')
-        self.listbox_encrypt_files.grid(column=0, columnspan=2, row=2, padx='5', pady='5', sticky=N+E+S+W)
+        self.listbox_encrypt_files = ContextMenuListBox(
+            self.encrypt_tab, selectmode='multiple')
+        self.listbox_encrypt_files.grid(
+            column=0, columnspan=2, row=2, padx='5', pady='5', sticky=N+E+S+W)
         self.listbox_encrypt_files.configure(selectbackground="dimgray")
 
         scrollbar = Scrollbar(self.listbox_encrypt_files, orient=VERTICAL)
-        scrollbar.pack(side = RIGHT, fill=Y)
-        self.listbox_encrypt_files.configure(yscrollcommand = scrollbar.set)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        self.listbox_encrypt_files.configure(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.listbox_encrypt_files.yview)
 
         self.label_encrypted_files_counter_text = StringVar()
         self.label_encrypted_files_counter_text.set("")
-        self.label_encrypted_files_counter = Label(self.encrypt_tab, textvariable=self.label_encrypted_files_counter_text)
-        self.label_encrypted_files_counter.grid(column=0, columnspan=2, row=3, sticky=E+W)
+        self.label_encrypted_files_counter = Label(
+            self.encrypt_tab, textvariable=self.label_encrypted_files_counter_text)
+        self.label_encrypted_files_counter.grid(
+            column=0, columnspan=2, row=3, sticky=E+W)
 
-        button_encrypt_files = Button(self.encrypt_tab, text="Encrypt", command=self.buttonEncryptionClick)
-        button_encrypt_files.grid(column=0, columnspan=2, row=4, padx='5', pady='5', sticky=E+W)
+        button_encrypt_files = Button(
+            self.encrypt_tab, text="Encrypt", command=self.buttonEncryptionClick)
+        button_encrypt_files.grid(
+            column=0, columnspan=2, row=4, padx='5', pady='5', sticky=E+W)
 
     def init_decrypt_tab(self):
         Grid.columnconfigure(self.decrypt_tab, 0, weight=1)
@@ -119,22 +138,31 @@ class MainWindow():
         Grid.rowconfigure(self.decrypt_tab, 2, weight=0)
         Grid.rowconfigure(self.decrypt_tab, 3, weight=0)
 
-        label_select_files_decrypt = Label(self.decrypt_tab, text="Select the files you want to decrypt: ")
-        label_select_files_decrypt.grid(column=0, row=0, padx='5', pady='5', sticky=W)
+        label_select_files_decrypt = Label(
+            self.decrypt_tab, text="Select the files you want to decrypt: ")
+        label_select_files_decrypt.grid(
+            column=0, row=0, padx='5', pady='5', sticky=W)
 
-        self.listbox_decrypt_files = Listbox(self.decrypt_tab, selectmode='multiple')
-        self.listbox_decrypt_files.grid(column=0, row=1, padx='5', pady='5', sticky=N+E+S+W)
+        self.listbox_decrypt_files = Listbox(
+            self.decrypt_tab, selectmode='multiple')
+        self.listbox_decrypt_files.grid(
+            column=0, row=1, padx='5', pady='5', sticky=N+E+S+W)
         self.listbox_decrypt_files.configure(selectbackground="dimgray")
 
         scrollbar = Scrollbar(self.listbox_decrypt_files, orient=VERTICAL)
-        scrollbar.pack(side = RIGHT, fill=Y)
-        self.listbox_decrypt_files.configure(yscrollcommand = scrollbar.set)
+        scrollbar.pack(side=RIGHT, fill=Y)
+        self.listbox_decrypt_files.configure(yscrollcommand=scrollbar.set)
         scrollbar.config(command=self.listbox_decrypt_files.yview)
 
         self.label_decrypted_files_counter_text = StringVar()
-        self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(self.listbox_encrypt_files.size(), self.listbox_encrypt_files.size()))
-        self.label_decrypted_files_counter_text = Label(self.decrypt_tab, textvariable=self.label_encrypted_files_counter_text)
-        self.label_decrypted_files_counter_text.grid(column=0, row=2, sticky=E+W)
+        self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(
+            self.listbox_encrypt_files.size(), self.listbox_encrypt_files.size()))
+        self.label_decrypted_files_counter_text = Label(
+            self.decrypt_tab, textvariable=self.label_encrypted_files_counter_text)
+        self.label_decrypted_files_counter_text.grid(
+            column=0, row=2, sticky=E+W)
 
-        button_decrypt_files = Button(self.decrypt_tab, text="Decrypt", command=self.buttonDecryptionClick)
-        button_decrypt_files.grid(column=0, row=3, padx='5', pady='5', sticky=E+W)
+        button_decrypt_files = Button(
+            self.decrypt_tab, text="Decrypt", command=self.buttonDecryptionClick)
+        button_decrypt_files.grid(
+            column=0, row=3, padx='5', pady='5', sticky=E+W)

@@ -1,10 +1,19 @@
-from Projekt.Encryption.key_generator import key_generator
+from Encryption.key_generator import key_generator
+from IO.FileAccess import file_access
 
 
 class encrypter():
 
     __key_gen = key_generator()
     __mask = 0b11111111
+    __filePath: str = None
+    __passwordHash: bytearray = None
+    __fileAccess: file_access = None
+
+    def __init__(self, filePath: str, password: str):
+        self.__filePath = filePath
+        self.__passwordHash = self.__key_gen.get_password_hash(password)
+        self.__fileAccess = file_access(filePath)
 
     def encrypt2(self, data: bytearray, password: str):
 

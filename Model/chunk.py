@@ -11,7 +11,7 @@ class chunk(object, metaclass=ABCMeta):
     Index = -1
     ChunkAddress = 0
     NextChunkAddress = 0
-    NextChunk = None
+    NextChunk: chunk = None
 
     @abstractmethod
     def __init__(self, chunk_type: chunk_type):
