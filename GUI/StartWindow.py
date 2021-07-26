@@ -54,7 +54,6 @@ class StartWindow():
 
         self.root.destroy()
         MainWindow(crypter).start()
-        '''Muss ich diesen Fall wirklich extra abfangen?'''
 
     def create_widgets(self):
         label_enter_password = Label(self.root, text="Enter the password: ")

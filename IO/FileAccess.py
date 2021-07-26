@@ -29,14 +29,14 @@ class file_access:
                 chunk_type.Header, passwordHash))
             self.insert_chunks(headers)
 
-    def read_bytes(filePath: str) -> bytearray:
+    def read_bytes(self, filePath: str) -> bytearray:
         bytes = bytearray()
         with open(filePath, "rb") as f:
             bytes = f.read()
 
         return bytes
 
-    def write_bytes(filePath: str, data: bytearray):
+    def write_bytes(self, filePath: str, data: bytearray):
         with open(filePath, "wb") as f:
             f.write(data)
 
@@ -58,9 +58,9 @@ class file_access:
 
     def write_files(self, files: list[file_model]):
         content = ''.join(
-            [num.FullPath + "*/" + num.ChunkAddress for num in files])
+            [num.FullPath + "*/" + str(num.ChunkAddress) for num in files])
 
-        data = content.encode("UTF-8")
+        data = bytearray(content.encode("UTF-8"))
 
         chunks = list(chunk.get_chunks_for_data(chunk_type.Map, data))
         self.insert_chunks(chunks)

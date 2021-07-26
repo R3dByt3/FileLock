@@ -8,12 +8,10 @@ class encrypter():
 
     __key_gen = key_generator()
     __mask = 0b11111111
-    __filePath: str = None
     __passwordHash: bytearray = None
     __fileAccess: file_access = None
 
     def __init__(self, filePath: str, password: str):
-        self.__filePath = filePath
         self.__passwordHash = self.__key_gen.get_password_hash(password)
         self.__fileAccess = file_access(filePath, self.__passwordHash)
 
@@ -21,7 +19,7 @@ class encrypter():
         return self.__fileAccess.read_files()
 
     def encrypt2(self, fileModel: file_model) -> None:
-        data = self.__fileAccess.read_bytes()
+        data = self.__fileAccess.read_bytes(fileModel.FullPath)
 
         crypted = bytearray(self.__passwordHash)
 
@@ -34,11 +32,11 @@ class encrypter():
             crypted_byte = (data[count] + curr_rnd_hash[index] +
                             self.__passwordHash[index]) & self.__mask
 
-            crypted += curr_rnd_hash[index]
-            crypted += crypted_byte
+            crypted.append(curr_rnd_hash[index])
+            crypted.append(crypted_byte)
 
-        chunks = chunk.get_chunks_for_data(chunk_type.Data, crypted)
-        self.__fileAccess.insert_chunks(crypted)
+        chunks = list(chunk.get_chunks_for_data(chunk_type.Data, crypted))
+        self.__fileAccess.insert_chunks(chunks)
 
         fileModel.ChunkAddress = chunks[0].ChunkAddress
 
@@ -75,7 +73,7 @@ class encrypter():
         return retval
 
     def encrypt(self, fileModel: file_model):
-        data = self.__fileAccess.read_bytes()
+        data = self.__fileAccess.read_bytes(fileModel.FullPath)
 
         curr_rnd_hash = self.__key_gen.get_random_hash()
 
@@ -88,10 +86,10 @@ class encrypter():
             crypted_byte = (data[count] + curr_rnd_hash[index] +
                             self.__passwordHash[index]) & self.__mask
 
-            crypted += crypted_byte
+            crypted.append(crypted_byte)
 
-        chunks = chunk.get_chunks_for_data(chunk_type.Data, crypted)
-        self.__fileAccess.insert_chunks(crypted)
+        chunks = list(chunk.get_chunks_for_data(chunk_type.Data, crypted))
+        self.__fileAccess.insert_chunks(chunks)
 
         fileModel.ChunkAddress = chunks[0].ChunkAddress
 
