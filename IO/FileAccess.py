@@ -115,9 +115,10 @@ class file_access:
             size = f.tell()
             f.seek(0)
 
+            address = 0
+
             while(f.tell() < size):
                 current: chunk = None
-                address = 0
                 type = chunk_type(int.from_bytes(f.read(2), "big"))
 
                 if type == searchType:
