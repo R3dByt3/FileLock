@@ -29,6 +29,33 @@ class file_access:
                 chunk_type.Header, passwordHash))
             self.insert_chunks(headers)
 
+    def read_bytes(filePath: str) -> bytearray:
+        bytes = bytearray()
+        with open(filePath, "rb") as f:
+            bytes = f.read()
+
+        return bytes
+
+    def write_bytes(filePath: str, data: bytearray):
+        with open(filePath, "wb") as f:
+            f.write(data)
+
+    def get_chunk(self, findAddress: int) -> chunk:
+        with open(self.__filePath, "rb") as f:
+            f.seek(findAddress)
+
+            current: chunk = None
+            type = chunk_type(int.from_bytes(f.read(2), "big"))
+
+            data = bytearray(f.read(1024 * 1024))
+            current = chunk(type, data)
+            current.NextChunkAddress = int.from_bytes(
+                f.read(2), byteorder="big", signed=True)
+            current.ChunkAddress = findAddress
+        
+        if current.NextChunkAddress != -1:
+            current.NextChunk = self.get_chunk(current.NextChunkAddress)
+
     def write_files(self, files: list[file_model]):
         content = ''.join(
             [num.FullPath + "*/" + num.ChunkAddress for num in files])
@@ -48,7 +75,7 @@ class file_access:
             data = bytearray(current.Data)
             while (single.NextChunk != None):
                 current = current.NextChunk
-                data.append(current.Data)
+                data += current.Data
 
             content = data.decode("UTF-8")
 
@@ -67,17 +94,14 @@ class file_access:
 
     def insert_chunks(self, chunks: list[chunk]):
         with open(self.__filePath, "wb") as f:
-            f.seek(0, os.SEEK_END)
-            size = f.tell()
-            f.seek(0)
             for index in range(0, len(chunks)):
                 if chunks[index].ChunkAddress != -1:
                     f.seek(chunks[index].ChunkAddress)
                     f.write(chunks[index].serialize())
                 else:
                     f.seek(0, os.SEEK_END)
+                    chunks[index].ChunkAddress = f.tell()
                     f.write(chunks[index].serialize())
-                    size = f.tell()
 
     def read_chunks(self, searchType: chunk_type) -> list[chunk]:
 
