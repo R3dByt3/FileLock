@@ -41,6 +41,8 @@ class file_access:
     def read_files(self) -> list[file_model]:
         chunks = self.read_chunks(chunk_type.Map)
 
+        content = None
+
         for single in chunks:
             current = single
             data = bytearray(current.Data)
@@ -49,6 +51,9 @@ class file_access:
                 data.append(current.Data)
 
             content = data.decode("UTF-8")
+
+        if content == None:
+            return list[file_model]
 
         parts = content.split("*/")
 
