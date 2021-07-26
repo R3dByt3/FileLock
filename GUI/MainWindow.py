@@ -6,21 +6,20 @@ from GUI.ContextMenuListBox import ContextMenuListBox
 from tkinter import ttk
 from os.path import *
 
-
 class MainWindow():
-    def __init__(self):
+    crypter: encrypter = None
+
+    def __init__(self, crypter: encrypter):
         path = join(dirname(dirname(realpath(__file__))),
                     "Images", "applicationicon.ico")
-
-        dbPath = join(dirname(dirname(realpath(__file__))), "db.db")
+        
+        self.crypter = crypter
 
         self.root = Tk()
         self.root.wm_title("File encryptor")
         self.root.iconbitmap(path)
         self.root.geometry("500x500")
         self.root.eval('tk::PlaceWindow . center')
-
-        self.crypter = encrypter(dbPath, "Mein PW")
 
         self.tab_control = ttk.Notebook(self.root)
 
@@ -37,6 +36,11 @@ class MainWindow():
 
     def start(self):
         self.root.mainloop()
+
+    def getEncryptedFiles(self):
+        files = self.crypter.read_files()
+        for element in files:
+            self.listbox_decrypt_files.insert("end", element)
 
     def openFileDialog(self):
         filenames = askopenfilenames()
@@ -62,9 +66,9 @@ class MainWindow():
                 self.listbox_encrypt_files.get(selectedItem), "rb").read()
 
             if simpleMode:
-                wasSuccessful = self.crypter.encrypt(bytearrayFile, "Mein PW")
+                wasSuccessful = self.crypter.encrypt(bytearrayFile)
             else:
-                tkinter.messagebox.showerror("Encryption failed", "no")
+                wasSuccessful = self.crypter.encrypt2(bytearrayFile)
 
             if not wasSuccessful:
                 tkinter.messagebox.showerror(
@@ -78,15 +82,31 @@ class MainWindow():
 
         tkinter.messagebox.showinfo(
             "Encryption succeeded", "All files were encrypted.")
+        
+        self.getEncryptedFiles()
 
     def buttonDecryptionClick(self):
-        dosomething = False
-        if dosomething:
-            tkinter.messagebox.showinfo(
-                "Decryption succeeded", "All file were decrypted.")
-        else:
+        selectedItems = self.listbox_decrypt_files.curselection()
+
+        if selectedItems == ((),):
             tkinter.messagebox.showerror(
-                "Decryption failed", "Decryption failed")
+            "Encryption failed", "No files selected")
+            return
+
+        counter = 0
+
+        for selectedItem in selectedItems:
+            wasSuccessful = self.crypter.decrypt(selectedItem)
+
+            if not wasSuccessful:
+                tkinter.messagebox.showerror(
+                    "Decryption failed", "Decryption failed")
+                return
+
+            counter = counter + 1
+            self.label_decrypted_files_counter_text.set(
+                "{} of {} files were decrypted".format(counter, len(selectedItems)))
+            self.listbox_decrypt_files.update()
 
     def init_encrypt_tab(self):
         Grid.columnconfigure(self.encrypt_tab, 0, weight=1)
@@ -154,6 +174,8 @@ class MainWindow():
         self.listbox_decrypt_files.grid(
             column=0, row=1, padx='5', pady='5', sticky=N+E+S+W)
         self.listbox_decrypt_files.configure(selectbackground="dimgray")
+
+        self.getEncryptedFiles()
 
         scrollbar = Scrollbar(self.listbox_decrypt_files, orient=VERTICAL)
         scrollbar.pack(side=RIGHT, fill=Y)
