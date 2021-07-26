@@ -27,6 +27,8 @@ class file_access:
         else:
             headers = list(chunk.get_chunks_for_data(
                 chunk_type.Header, passwordHash))
+            with open(filePath, "wb") as f:
+                f.flush
             self.insert_chunks(headers)
 
     def read_bytes(self, filePath: str) -> bytearray:
@@ -37,7 +39,7 @@ class file_access:
         return bytes
 
     def write_bytes(self, filePath: str, data: bytearray):
-        with open(filePath, "wb") as f:
+        with open(filePath, "r+b") as f:
             f.write(data)
 
     def get_chunk(self, findAddress: int) -> chunk:
@@ -88,12 +90,12 @@ class file_access:
             yield file_model(parts[index], parts[index + 1])
 
     def write_all_chunks(self, chunks: list[chunk]):
-        with open(self.__filePath, "wb") as f:
+        with open(self.__filePath, "r+b") as f:
             for index in range(0, len(chunks)):
                 f.write(chunks[index].serialize())
 
     def insert_chunks(self, chunks: list[chunk]):
-        with open(self.__filePath, "wb") as f:
+        with open(self.__filePath, "r+b") as f:
             for index in range(0, len(chunks)):
                 if chunks[index].ChunkAddress != -1:
                     f.seek(chunks[index].ChunkAddress)
