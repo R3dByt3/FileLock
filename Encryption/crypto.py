@@ -21,6 +21,9 @@ class encrypter():
     def encrypt2(self, fileModel: file_model) -> None:
         data = self.__fileAccess.read_bytes(fileModel.FullPath)
 
+        fileModel.EncryptionType = 2
+        fileModel.Length = len(data)
+
         crypted = bytearray(self.__passwordHash)
 
         for count in range(0, len(data)):
@@ -43,6 +46,9 @@ class encrypter():
         self.__fileAccess.write_files([fileModel])
 
     def decrypt2(self, fileModel: file_model) -> bytearray():
+        if fileModel.EncryptionType != 2:
+            raise AttributeError
+        
         retval = bytearray()
         index = 0
 
@@ -53,6 +59,8 @@ class encrypter():
         while (current.NextChunk != None):
             current = current.NextChunk
             data += current.Data
+            
+        data = data[:fileModel.Length]
 
         for count in range(0, 127):
             if (data[count] != self.__passwordHash[count]):
@@ -75,6 +83,9 @@ class encrypter():
     def encrypt(self, fileModel: file_model):
         data = self.__fileAccess.read_bytes(fileModel.FullPath)
 
+        fileModel.EncryptionType = 1
+        fileModel.Length = len(data)
+
         curr_rnd_hash = self.__key_gen.get_random_hash()
 
         crypted = bytearray(self.__passwordHash)
@@ -96,6 +107,9 @@ class encrypter():
         self.__fileAccess.write_files([fileModel])
 
     def decrypt(self, fileModel: file_model) -> bytearray():
+        if fileModel.EncryptionType != 1:
+            raise AttributeError
+
         retval = bytearray()
         index = 0
 
@@ -106,6 +120,8 @@ class encrypter():
         while (current.NextChunk != None):
             current = current.NextChunk
             data += current.Data
+
+        data = data[:fileModel.Length]
 
         for count in range(0, len(data), 2):
             hash_byte = data[count]

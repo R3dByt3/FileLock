@@ -60,7 +60,7 @@ class file_access:
 
     def write_files(self, files: list[file_model]):
         content = ''.join(
-            [num.FullPath + "*/" + str(num.ChunkAddress) for num in files])
+            [num.FullPath + "*/" + str(num.ChunkAddress) + "*/" + str(num.EncryptionType) + "*/" + str(num.Length) for num in files])
 
         data = bytearray(content.encode("UTF-8"))
 
@@ -86,8 +86,8 @@ class file_access:
 
         parts = content.split("*/")
 
-        for index in range(0, len(parts), 2):
-            yield file_model(parts[index], parts[index + 1])
+        for index in range(0, len(parts), 4):
+            yield file_model(parts[index], parts[index + 1], parts[index + 2], parts[index + 3])
 
     def write_all_chunks(self, chunks: list[chunk]):
         with open(self.__filePath, "r+b") as f:
