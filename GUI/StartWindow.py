@@ -12,8 +12,8 @@ class StartWindow():
         self.root = Tk()
         self.root.wm_title("FileLock")
         self.set_geometry_start_window()
-        path = join(dirname(dirname(realpath(__file__))), "Images", "applicationicon.ico")
-        self.root.iconbitmap(path)
+        icon_path = join(dirname(dirname(realpath(__file__))), "Images", "applicationicon.ico")
+        self.root.iconbitmap(icon_path)
 
         Grid.columnconfigure(self.root, 0, weight=1)
         Grid.columnconfigure(self.root, 1, weight=2)
@@ -50,6 +50,7 @@ class StartWindow():
                 self.entry_password.delete(0, 'end')
                 return
         else:
+            tkinter.messagebox.showinfo("New password set", "You created a new database with the entered password.")
             crypter = encrypter(self.__dbPath, self.entry_password.get())
 
         self.root.destroy()
