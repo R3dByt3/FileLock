@@ -11,8 +11,7 @@ class chunk():
 
     def __init__(self, chunk_type: chunk_type, data: bytearray):
 
-        for x in range(0, 1024 * 1024 + 4 - len(data)):
-            data.append(0)
+        data += bytearray(1024 * 1024 - len(data))
 
         self.Type = chunk_type
         self.Data = data

@@ -98,7 +98,7 @@ class file_access:
         with open(self.__filePath, "r+b") as f:
             for index in range(0, len(chunks)):
                 if chunks[index].ChunkAddress != -1:
-                    f.seek(chunks[index].ChunkAddress)
+                    f.seek(chunks[index].ChunkAddress, os.SEEK_CUR)
                     f.write(chunks[index].serialize())
                 else:
                     f.seek(0, os.SEEK_END)
@@ -140,8 +140,14 @@ class file_access:
 
     def resolve_childs(self, single: chunk, chunks: list[chunk]) -> chunk:
         if (single.NextChunkAddress != 0):
-            single.NextChunk = next(
-                obj for obj in chunks if obj.ChunkAddress == single.NextChunkAddress)
-            chunks.remove(single.NextChunk)
+            single.NextChunk = self.get_first_matching_chunk_address_or_none(chunks, single.NextChunkAddress)
+            if (single.NextChunk != None):
+                chunks.remove(single.NextChunk)
 
         return single
+
+    def get_first_matching_chunk_address_or_none(self, chunks: list[chunk], chunkaddress: int) -> chunk:
+        for item in chunks or []:
+            if item.ChunkAddress == chunkaddress:
+                return item
+        return None
