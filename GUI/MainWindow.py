@@ -2,10 +2,11 @@ from Model.filemodel import file_model
 import tkinter.messagebox
 from Encryption.crypto import encrypter
 from tkinter import *
-from tkinter.filedialog import askopenfilenames
+from tkinter.filedialog import askdirectory, askopenfilenames
 from GUI.ContextMenuListBox import ContextMenuListBox
 from tkinter import ttk
 from os.path import *
+from os import path
 
 class MainWindow():
     __crypter: encrypter = None
@@ -88,18 +89,31 @@ class MainWindow():
 
         counter = 0
 
+        dir = askdirectory()
+
         for selectedItem in selectedItems:
             selected_file_model = next((x for x in self.__decrypt_files if x.FullPath == self.listbox_decrypt_files.get(selectedItem)), None)
 
-            wasSuccessful = self.__crypter.decrypt(selected_file_model)
+            try:
+                if selected_file_model.EncryptionType == 1:
+                    data = self.__crypter.decrypt(selected_file_model)
+                else:
+                    data = self.__crypter.decrypt2(selected_file_model)
 
-            if not wasSuccessful:
+                fileName = path.basename(selected_file_model.FullPath)
+                combinedPath = join(dir, fileName)
+
+                self.__crypter.write_bytes_to_new_file(combinedPath, data)
+                
+            except:
                 tkinter.messagebox.showerror("Decryption failed", "Decryption failed")
-                return
+                return                
 
             counter = counter + 1
             self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(counter, len(selectedItems)))
             self.listbox_decrypt_files.update()
+
+        tkinter.messagebox.showinfo("Decryption succeeded", "All files were decrypted.")
 
     def init_encrypt_tab(self):
         Grid.columnconfigure(self.encrypt_tab, 0, weight=1)
@@ -162,8 +176,8 @@ class MainWindow():
 
         self.label_decrypted_files_counter_text = StringVar()
         self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(self.listbox_encrypt_files.size(), self.listbox_encrypt_files.size()))
-        self.label_decrypted_files_counter_text = Label(self.decrypt_tab, textvariable=self.label_encrypted_files_counter_text)
-        self.label_decrypted_files_counter_text.grid(column=0, row=2, sticky=E+W)
+        self.label_decrypted_files_counter = Label(self.decrypt_tab, textvariable=self.label_encrypted_files_counter_text)
+        self.label_decrypted_files_counter.grid(column=0, row=2, sticky=E+W)
 
         button_decrypt_files = Button(self.decrypt_tab, text="Decrypt", command=self.button_decryption_click)
         button_decrypt_files.grid(column=0, row=3, padx='5', pady='5', sticky=E+W)

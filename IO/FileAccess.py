@@ -42,6 +42,10 @@ class file_access:
         with open(filePath, "r+b") as f:
             f.write(data)
 
+    def write_bytes_to_new_file(self, filePath: str, data: bytearray):
+        with open(filePath, "wb") as f:
+            f.write(data)
+
     def get_chunk(self, findAddress: int) -> chunk:
         with open(self.__filePath, "rb") as f:
             f.seek(findAddress)
@@ -57,6 +61,8 @@ class file_access:
         
         if current.NextChunkAddress != -1:
             current.NextChunk = self.get_chunk(current.NextChunkAddress)
+
+        return current
 
     def write_files(self, files: list[file_model]):
         content = ''.join(
@@ -80,14 +86,15 @@ class file_access:
                 data += current.Data
 
             content = data.decode("UTF-8")
+            parts = content.split("*/")
 
-        if content == None:
+            for index in range(0, len(parts), 4):
+                model = file_model(parts[index], int(parts[index + 1]))
+                model.EncryptionType = int(parts[index + 2])
+                model.Length = int(parts[index + 3].rstrip('\x00'))
+                yield model
+        else:
             return list[file_model]
-
-        parts = content.split("*/")
-
-        for index in range(0, len(parts), 4):
-            yield file_model(parts[index], parts[index + 1], parts[index + 2], parts[index + 3])
 
     def write_all_chunks(self, chunks: list[chunk]):
         with open(self.__filePath, "r+b") as f:

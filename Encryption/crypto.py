@@ -18,13 +18,16 @@ class encrypter():
     def read_files(self) -> list[file_model]:
         return self.__fileAccess.read_files()
 
+    def write_bytes_to_new_file(self, filePath: str, data: bytearray):
+        self.__fileAccess.write_bytes_to_new_file(filePath, data)
+
     def encrypt2(self, fileModel: file_model) -> None:
         data = self.__fileAccess.read_bytes(fileModel.FullPath)
 
         fileModel.EncryptionType = 2
         fileModel.Length = len(data)
 
-        crypted = bytearray(self.__passwordHash)
+        crypted = bytearray()
 
         for count in range(0, len(data)):
             index = count % 128
@@ -59,24 +62,19 @@ class encrypter():
         while (current.NextChunk != None):
             current = current.NextChunk
             data += current.Data
-            
-        data = data[:fileModel.Length]
 
-        for count in range(0, 127):
-            if (data[count] != self.__passwordHash[count]):
-                raise PermissionError("Wrong password")
+        data = data[:fileModel.Length * 2]
 
-        for count in range(128, len(data), 2):
+        for count in range(0, len(data), 2):
+            index = count % 128
+
             hash_byte = data[count]
             crypted_byte = data[count + 1]
 
             decrypted_byte = (crypted_byte - hash_byte -
                               self.__passwordHash[index]) & self.__mask
 
-            index = index + 1
-            index = index % 128
-
-            retval += decrypted_byte
+            retval.append(decrypted_byte)
 
         return retval
 
@@ -87,9 +85,7 @@ class encrypter():
         fileModel.Length = len(data)
 
         curr_rnd_hash = self.__key_gen.get_random_hash()
-
-        crypted = bytearray(self.__passwordHash)
-        crypted += curr_rnd_hash
+        crypted = bytearray(curr_rnd_hash)
 
         for count in range(0, len(data)):
             index = count % 128
@@ -121,18 +117,17 @@ class encrypter():
             current = current.NextChunk
             data += current.Data
 
-        data = data[:fileModel.Length]
+        data = data[:fileModel.Length + 128]
 
-        for count in range(0, len(data), 2):
-            hash_byte = data[count]
-            crypted_byte = data[count + 1]
+        rnd_hash = bytearray(data[:128])
 
-            decrypted_byte = (crypted_byte - hash_byte -
+        for count in range(128, len(data)):
+            index = count % 128
+            crypted_byte = data[count]
+
+            decrypted_byte = (crypted_byte - rnd_hash[index] -
                               self.__passwordHash[index]) & self.__mask
 
-            index = index + 1
-            index = index % 128
-
-            retval += decrypted_byte
+            retval.append(decrypted_byte)
 
         return retval
