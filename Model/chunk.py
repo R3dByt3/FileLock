@@ -20,7 +20,7 @@ class chunk():
 
         data = bytearray(int(self.Type).to_bytes(2, "big"))
         data += self.Data
-        data += bytearray(self.NextChunkAddress.to_bytes(2,
+        data += bytearray(self.NextChunkAddress.to_bytes(8,
                           byteorder="big", signed=True))
         return data
 
@@ -29,7 +29,7 @@ class chunk():
         self.Type = chunk_type(int.from_bytes(data[:2], "big"))
         self.Data = data[2:1024*1024 + 2]
         self.NextChunkAddress = int.from_bytes(
-            data[1024*1024 + 2:], byteorder="big", signed=True)
+            data[1024*1024 + 8:], byteorder="big", signed=True)
 
     @staticmethod
     def get_chunks_for_data(chunk_type: chunk_type, data: bytearray) -> list['chunk']:

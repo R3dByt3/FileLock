@@ -68,7 +68,8 @@ class MainWindow():
                     self.__crypter.encrypt(file_model(self.listbox_encrypt_files.get(selectedItem), -1))
                 else:
                     self.__crypter.encrypt2(file_model(self.listbox_encrypt_files.get(selectedItem), -1))
-            except Exception:
+            except Exception as e:
+                print(e)
                 tkinter.messagebox.showerror("Encryption failed", "Encryption failed")
                 return
 
@@ -105,7 +106,8 @@ class MainWindow():
 
                 self.__crypter.write_bytes_to_new_file(combinedPath, data)
                 
-            except:
+            except Exception as e:
+                print(e)
                 tkinter.messagebox.showerror("Decryption failed", "Decryption failed")
                 return                
 

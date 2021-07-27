@@ -56,7 +56,7 @@ class file_access:
             data = bytearray(f.read(1024 * 1024))
             current = chunk(type, data)
             current.NextChunkAddress = int.from_bytes(
-                f.read(2), byteorder="big", signed=True)
+                f.read(8), byteorder="big", signed=True)
             current.ChunkAddress = findAddress
         
         if current.NextChunkAddress != -1:
@@ -104,6 +104,10 @@ class file_access:
     def insert_chunks(self, chunks: list[chunk]):
         with open(self.__filePath, "r+b") as f:
             for index in range(0, len(chunks)):
+                if chunks[index].NextChunk != None:
+                    self.insert_chunks([chunks[index].NextChunk])
+                    chunks[index].NextChunkAddress = chunks[index].NextChunk.ChunkAddress
+
                 if chunks[index].ChunkAddress != -1:
                     f.seek(chunks[index].ChunkAddress, os.SEEK_CUR)
                     f.write(chunks[index].serialize())
@@ -132,13 +136,13 @@ class file_access:
                     data = bytearray(f.read(1024 * 1024))
                     current = chunk(searchType, data)
                     current.NextChunkAddress = int.from_bytes(
-                        f.read(2), byteorder="big", signed=True)
+                        f.read(8), byteorder="big", signed=True)
                     current.ChunkAddress = address
                     chunks.append(current)
                 else:
-                    f.seek(1024 * 1024 + 2, os.SEEK_CUR)
+                    f.seek(1024 * 1024 + 8, os.SEEK_CUR)
 
-                address = address + 1024 * 1024 + 4
+                address = address + 1024 * 1024 + 10
 
         for single in chunks.copy():
             retVal.append(self.resolve_childs(single, chunks))

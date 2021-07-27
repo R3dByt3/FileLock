@@ -66,13 +66,15 @@ class encrypter():
         data = data[:fileModel.Length * 2]
 
         for count in range(0, len(data), 2):
-            index = count % 128
+            index = index % 128
 
             hash_byte = data[count]
             crypted_byte = data[count + 1]
 
             decrypted_byte = (crypted_byte - hash_byte -
                               self.__passwordHash[index]) & self.__mask
+
+            index += 1
 
             retval.append(decrypted_byte)
 
