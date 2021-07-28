@@ -52,6 +52,7 @@ class MainWindow():
 
     def get_encrypted_files(self):
         self.__decrypt_files = list(self.__crypter.read_files())
+        self.listbox_decrypt_files.delete('0', 'end')
         for element in self.__decrypt_files:
             self.listbox_decrypt_files.insert("end", element.FullPath)
 
