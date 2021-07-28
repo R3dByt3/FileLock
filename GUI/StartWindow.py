@@ -50,7 +50,7 @@ class StartWindow():
                 self.entry_password.delete(0, 'end')
                 return
         else:
-            tkinter.messagebox.showinfo("New password set", "You created a new database with the entered password.")
+            tkinter.messagebox.showinfo("New database created", "You created a new database with the entered password.")
             crypter = encrypter(self.__dbPath, self.entry_password.get())
 
         self.root.destroy()

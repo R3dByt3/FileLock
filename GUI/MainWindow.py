@@ -13,15 +13,13 @@ class MainWindow():
     __decrypt_files: list[file_model] = []
 
     def __init__(self, crypter: encrypter):
-        path = join(dirname(dirname(realpath(__file__))),"Images", "applicationicon.ico")
-        
-        self.__crypter = crypter
-
         self.root = Tk()
-        self.root.wm_title("File encryptor")
-        self.root.iconbitmap(path)
-        self.root.geometry("500x500")
-        self.root.eval('tk::PlaceWindow . center')
+        self.root.wm_title("FileLock")
+        self.set_geometry_main_window()
+        icon_path = join(dirname(dirname(realpath(__file__))),"Images", "applicationicon.ico")
+        self.root.iconbitmap(icon_path)
+
+        self.__crypter = crypter
 
         self.tab_control = ttk.Notebook(self.root)
 
@@ -35,6 +33,19 @@ class MainWindow():
         self.tab_control.add(self.decrypt_tab, text='Decrypt')
 
         self.tab_control.pack(expand=1, fill="both")
+
+    def set_geometry_main_window(self):
+        application_width = 500
+        frame_width = self.root.winfo_rootx() - self.root.winfo_x()
+        window_width = application_width + 2 * frame_width
+
+        application_height = 500
+        titlebar_height = self.root.winfo_rooty() - self.root.winfo_y()
+        window_height = application_height + titlebar_height + frame_width
+
+        x = self.root.winfo_screenwidth() // 2 - window_width // 2
+        y = self.root.winfo_screenheight() // 2 - window_height // 2
+        self.root.geometry('{}x{}+{}+{}'.format(application_width, application_height, x, y))
 
     def start(self):
         self.root.mainloop()
@@ -50,31 +61,30 @@ class MainWindow():
             self.listbox_encrypt_files.insert("end", element)
 
     def button_encryption_click(self):
-        selectedItems = self.listbox_encrypt_files.curselection()
+        selected_items = self.listbox_encrypt_files.curselection()
 
-        if selectedItems == ((),):
-            tkinter.messagebox.showerror("Encryption failed", "No files selected")
+        if len(selected_items) == 0:
+            tkinter.messagebox.showerror("Encryption failed", "No files selected.")
             return
 
         counter = 0
-        simpleMode = True
+        simple_mode = True
 
         if self.encryption_type_combobox.current() == 1:
-            simpleMode = False
+            simple_mode = False
 
-        for selectedItem in selectedItems:
+        for selected_item in selected_items:
             try:
-                if simpleMode:
-                    self.__crypter.encrypt(file_model(self.listbox_encrypt_files.get(selectedItem), -1))
+                if simple_mode:
+                    self.__crypter.encrypt(file_model(self.listbox_encrypt_files.get(selected_item), -1))
                 else:
-                    self.__crypter.encrypt2(file_model(self.listbox_encrypt_files.get(selectedItem), -1))
-            except Exception as e:
-                print(e)
-                tkinter.messagebox.showerror("Encryption failed", "Encryption failed")
+                    self.__crypter.encrypt2(file_model(self.listbox_encrypt_files.get(selected_item), -1))
+            except Exception:
+                tkinter.messagebox.showerror("Encryption failed", "The encryption failed.")
                 return
 
             counter = counter + 1
-            self.label_encrypted_files_counter_text.set("{} of {} files were encrypted".format(counter, len(selectedItems)))
+            self.label_encrypted_files_counter_text.set("{} of {} files were encrypted".format(counter, len(selected_items)))
             self.listbox_encrypt_files.update()
 
         tkinter.messagebox.showinfo("Encryption succeeded", "All files were encrypted.")
@@ -82,18 +92,17 @@ class MainWindow():
         self.get_encrypted_files()
 
     def button_decryption_click(self):
-        selectedItems = self.listbox_decrypt_files.curselection()
+        selected_items = self.listbox_decrypt_files.curselection()
 
-        if selectedItems == ((),):
-            tkinter.messagebox.showerror("Encryption failed", "No files selected")
+        if len(selected_items) == 0:
+            tkinter.messagebox.showerror("Decryption failed", "No files selected.")
             return
 
         counter = 0
+        save_directory = askdirectory()
 
-        dir = askdirectory()
-
-        for selectedItem in selectedItems:
-            selected_file_model = next((x for x in self.__decrypt_files if x.FullPath == self.listbox_decrypt_files.get(selectedItem)), None)
+        for selected_item in selected_items:
+            selected_file_model = next((x for x in self.__decrypt_files if x.FullPath == self.listbox_decrypt_files.get(selected_item)), None)
 
             try:
                 if selected_file_model.EncryptionType == 1:
@@ -102,17 +111,16 @@ class MainWindow():
                     data = self.__crypter.decrypt2(selected_file_model)
 
                 fileName = path.basename(selected_file_model.FullPath)
-                combinedPath = join(dir, fileName)
+                combinedPath = join(save_directory, fileName)
 
                 self.__crypter.write_bytes_to_new_file(combinedPath, data)
                 
-            except Exception as e:
-                print(e)
-                tkinter.messagebox.showerror("Decryption failed", "Decryption failed")
+            except Exception:
+                tkinter.messagebox.showerror("Decryption failed", "The decryption failed.")
                 return                
 
             counter = counter + 1
-            self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(counter, len(selectedItems)))
+            self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(counter, len(selected_items)))
             self.listbox_decrypt_files.update()
 
         tkinter.messagebox.showinfo("Decryption succeeded", "All files were decrypted.")
@@ -177,8 +185,8 @@ class MainWindow():
         scrollbar.config(command=self.listbox_decrypt_files.yview)
 
         self.label_decrypted_files_counter_text = StringVar()
-        self.label_decrypted_files_counter_text.set("{} of {} files were decrypted".format(self.listbox_encrypt_files.size(), self.listbox_encrypt_files.size()))
-        self.label_decrypted_files_counter = Label(self.decrypt_tab, textvariable=self.label_encrypted_files_counter_text)
+        self.label_decrypted_files_counter_text.set("")
+        self.label_decrypted_files_counter = Label(self.decrypt_tab, textvariable=self.label_decrypted_files_counter_text)
         self.label_decrypted_files_counter.grid(column=0, row=2, sticky=E+W)
 
         button_decrypt_files = Button(self.decrypt_tab, text="Decrypt", command=self.button_decryption_click)
