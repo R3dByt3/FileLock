@@ -101,6 +101,10 @@ class MainWindow():
         counter = 0
         save_directory = askdirectory()
 
+        if save_directory == '':
+            tkinter.messagebox.showerror("Decryption failed", "No save directory was selected.")
+            return
+
         for selected_item in selected_items:
             selected_file_model = next((x for x in self.__decrypt_files if x.FullPath == self.listbox_decrypt_files.get(selected_item)), None)
 
